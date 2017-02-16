@@ -19,16 +19,41 @@ class BallGame:
             if event.type == pygame.QUIT:
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                pass
+                self.move()
+
+    def calculate_position_delta(self):
+        keys = pygame.key.get_pressed()
+        up = keys[pygame.K_UP]
+        down = keys[pygame.K_DOWN]
+        left = keys[pygame.K_LEFT]
+        right = keys[pygame.K_RIGHT]
+
+        horizontal = -1 if left else 1 if right else 0
+        vertical = -1 if up else 1 if down else 0
+
+        return (horizontal, vertical)
+
+    def restrict_movement(self, position_delta):
+        horizontal, vertical = position_delta
+        restrict_conditions = [
+            self.ballrect.left + horizontal < 0,
+            self.ballrect.right + horizontal > self.window_width,
+            self.ballrect.top + vertical < 0,
+            self.ballrect.bottom + vertical > self.window_height,
+        ]
+
+        for restrict_condition in restrict_conditions:
+            if restrict_condition:
+                return True
+
+        return False
 
     def move(self):
-        if (
-            self.ballrect.left <= 0
-            or self.ballrect.right >= self.window_width
-            or self.ballrect.top <= 0
-            or self.ballrect.bottom >= self.window_height
-        ):
+        position_delta = self.calculate_position_delta()
+        if self.restrict_movement(position_delta):
             return
+
+        self.ballrect.move(position_delta)
 
     def draw(self):
         self.screen.fill(self.black_color)
@@ -38,10 +63,7 @@ class BallGame:
     def run(self):
         while True:
             self.process_events()
-            self.move()
             self.draw()
-
-            pygame.time.delay(10)
 
 
 if __name__ == '__main__':
