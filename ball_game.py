@@ -14,25 +14,32 @@ class BallGame:
         self.ball = pygame.image.load('intro_ball.gif')
         self.ballrect = self.ball.get_rect()
 
+    def process_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                pass
+
+    def move(self):
+        if (
+            self.ballrect.left <= 0
+            or self.ballrect.right >= self.window_width
+            or self.ballrect.top <= 0
+            or self.ballrect.bottom >= self.window_height
+        ):
+            return
+
+    def draw(self):
+        self.screen.fill(self.black_color)
+        self.screen.blit(self.ball, self.ballrect)
+        pygame.display.flip()
+
     def run(self):
         while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
-                if event.type == pygame.KEYDOWN:
-                    pass
-
-            if (
-                self.ballrect.left <= 0
-                or self.ballrect.right >= self.window_width
-                or self.ballrect.top <= 0
-                or self.ballrect.bottom >= self.window_height
-            ):
-                continue
-
-            self.screen.fill(self.black_color)
-            self.screen.blit(self.ball, self.ballrect)
-            pygame.display.flip()
+            self.process_events()
+            self.move()
+            self.draw()
 
             pygame.time.delay(10)
 
