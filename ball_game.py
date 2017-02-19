@@ -2,6 +2,9 @@ import pygame
 import sys
 
 
+SLEEP_INTERVAL_IN_MILLISECONDS = 2
+
+
 class BallGame:
     def __init__(self):
         self.window_width = 640
@@ -15,12 +18,11 @@ class BallGame:
         self.ballrect = self.ball.get_rect()
 
     def process_events(self):
+        self.move()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN:
-                self.move()
 
     def calculate_position_delta(self):
         keys = pygame.key.get_pressed()
@@ -54,7 +56,7 @@ class BallGame:
         if self.restrict_movement(position_delta):
             return
 
-        self.ballrect.move(position_delta)
+        self.ballrect.move_ip(position_delta)
 
     def draw(self):
         self.screen.fill(self.black_color)
@@ -65,6 +67,7 @@ class BallGame:
         while True:
             self.process_events()
             self.draw()
+            pygame.time.delay(SLEEP_INTERVAL_IN_MILLISECONDS)
 
 
 if __name__ == '__main__':
