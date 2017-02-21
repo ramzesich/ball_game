@@ -5,24 +5,81 @@ import sys
 SLEEP_INTERVAL_IN_MILLISECONDS = 2
 
 
-class BallGame:
+class DrawableObject:
     def __init__(self):
-        self.window_width = 640
-        self.window_height = 480
-        self.window_size = (self.window_width, self.window_height)
+        self._image = None
+        self._rect = None
+
+        self.vertical_speed = 0
+        self.horizontal_speed = 0
+
+    @property
+    def rect(self):
+        return self._rect
+
+    @property
+    def image(self):
+        return self._image
+
+
+class Ball(DrawableObject):
+    def __init__(self):
+        super().__init__()
+        self._image = pygame.image.load('intro_ball.gif')
+        self._rect = self.ball_image.get_rect()
+
+
+class Window:
+    def __init__(self):
+        self.width = 800
+        self.height = 600
+        self.size = (self.width, self.height)
         self.black_color = (0, 0, 0)
 
-        self.screen = pygame.display.set_mode(self.window_size)
+        self.screen = pygame.display.set_mode(self.size)
 
-        self.ball = pygame.image.load('intro_ball.gif')
-        self.ballrect = self.ball.get_rect()
+    def restrict_movement(self, drawable_object, position_delta):
+        horizontal, vertical = position_delta
+        restrict_conditions = [
+            self.drawable_object.rect.left + horizontal < 0,
+            self.drawable_object.rect.right + horizontal > self.width,
+            self.drawable_object.rect.top + vertical < 0,
+            self.drawable_object.rect.bottom + vertical > self.height,
+        ]
+
+        for restrict_condition in restrict_conditions:
+            if restrict_condition:
+                return True
+
+        return False
+
+    def move(self, drawable_object, position_delta):
+        if self.restrict_movement(drawable_object, position_delta):
+            return
+
+        self.drawable_object.rect.move_ip(position_delta)
+
+    def draw(self, *drawable_objects):
+        self.screen.fill(self.black_color)
+
+        for drawable_object in drawable_objects:
+            self.screen.blit(drawable_object.image, drawable_object.rect)
+
+        pygame.display.flip()
+
+
+class BallGame:
+    def __init__(self):
+        self.window = Window()
+        self.ball = Ball()
 
     def process_events(self):
-        self.move()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
+        self.window.process_events
 
     def calculate_position_delta(self):
         keys = pygame.key.get_pressed()
@@ -36,32 +93,8 @@ class BallGame:
 
         return (horizontal, vertical)
 
-    def restrict_movement(self, position_delta):
-        horizontal, vertical = position_delta
-        restrict_conditions = [
-            self.ballrect.left + horizontal < 0,
-            self.ballrect.right + horizontal > self.window_width,
-            self.ballrect.top + vertical < 0,
-            self.ballrect.bottom + vertical > self.window_height,
-        ]
-
-        for restrict_condition in restrict_conditions:
-            if restrict_condition:
-                return True
-
-        return False
-
-    def move(self):
-        position_delta = self.calculate_position_delta()
-        if self.restrict_movement(position_delta):
-            return
-
-        self.ballrect.move_ip(position_delta)
-
     def draw(self):
-        self.screen.fill(self.black_color)
-        self.screen.blit(self.ball, self.ballrect)
-        pygame.display.flip()
+        self.window.draw(*[self.ball])
 
     def run(self):
         while True:
